@@ -1,0 +1,1214 @@
+#include<iostream>
+#include<string>
+#include<cstring>
+#include<iomanip>
+using namespace std;
+void submatrix(float matrix[100][100],float temp[100][100],int start,int counter,int n){
+    int i=0,j=0;
+    for(int rows=0 ;rows<n;rows++){
+        for(int cols=0 ; cols<n ;cols++){
+            if(rows !=start && cols != counter){
+                temp[i][j++] = matrix[rows][cols];
+                if(j==n-1){
+                    j=0;
+                    i++;
+                }
+            }
+        }
+    }
+}
+int determinant(float matrix[100][100] , int n){
+    signed int D =0;
+    if(n==1) return matrix[0][0];
+    if(n==2) return ((matrix[0][0] * matrix[1][1])-(matrix[0][1]*matrix[1][0]));
+    int s=1;
+    float temp[100][100];
+    for (int i = 0; i < n; i++) {
+      submatrix(matrix,temp,0,i,n);
+      D = D + s*matrix[0][i]*determinant(temp,n-1);
+      s=-s;
+   }
+    return D;
+}
+void adjoint(float matrix[100][100],float adj[100][100],int n){
+    if(n==1){
+        adj[0][0]=1;
+        return;
+    }
+    int s=1;
+    float temp[100][100];
+    for(int i=0 ; i<n;i++){
+        for(int j=0 ; j<n ; j++){
+            submatrix(matrix,temp,i,j,n);
+            if((i+j)%2==0)s=1;
+            else s=-1;
+            adj[j][i] = s*determinant(temp,n-1);
+        }
+    }
+}
+bool inverse(float matrix[100][100] , float inv[100][100],int n){
+    int D = determinant(matrix,n);
+    if(D == 0)return false;
+    float adj[100][100];
+    adjoint(matrix,adj,n);
+    
+    for(int i=0 ; i<n;i++){
+        for(int j=0 ; j<n ; j++){
+            inv[i][j] = adj[i][j]/float(D);
+        }
+    }
+    return true;
+}
+int main() {
+    int  i = 0, j=0,m=0,z=0,h1=0,h2=0,countrows1=1,countrows2=1,countcolumns1=1 ,countcolumns2=1,k;
+    float matrix[100][100],matrix2[100][100],decimal=0,
+    finalresult[100][100],inv[100][100]={0};
+    char arr[5000] ,sign[2] ,arr2[5000];
+    cin.getline(arr, 5000, '\n');
+    int length = strlen(arr);
+    for (j = 0,i=0,z=0; j < length;j++) {
+        decimal=0;
+        if (arr[j] == 44) {
+            countrows1++;
+            countcolumns1=0;
+            i++;
+            z=0;
+        }
+        if (arr[j] == 32 && arr[j+1] == 32) {
+            countcolumns1++;
+            j+=2;
+        }
+        if (arr[j] == 32) {
+            countcolumns1++;
+        }
+        else if ( arr[j] == 45  && //for -9999.999 ,3 decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57 &&
+        arr[j+5] == 46 &&
+        arr[j+6] >= 47 && arr[j+6] <= 57 &&
+        arr[j+7] >= 47 && arr[j+7] <= 57 &&
+        arr[j+8] >= 47 && arr[j+8] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+3]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+4]-48;
+            decimal = (((float)arr[j+6]-48)*100 + ((float)arr[j+7]-48)*10 + 
+            (float)arr[j+8]-48)/1000;
+            matrix[i][z] = -(matrix[i][z] + decimal);
+            z++;
+            j=j+8;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for -9999.99 2 ,decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57 &&
+        arr[j+5] == 46 &&
+        arr[j+6] >= 47 && arr[j+6] <= 57 &&
+        arr[j+7] >= 47 && arr[j+7] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+3]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+4]-48;
+            decimal = (((float)arr[j+6]-48)*10 + ((float)arr[j+7]-48))/100;
+            matrix[i][z] = -(matrix[i][z] + decimal);
+            z++;
+            j=j+7;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for -9999.99 , 1 decimal
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57 &&
+        arr[j+5] == 46 &&
+        arr[j+6] >= 47 && arr[j+6] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+3]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+4]-48;
+            decimal = ((float)arr[j+6]-48)/10;
+            matrix[i][z] = -(matrix[i][z] + decimal);
+            z++;
+            j=j+6;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for -999.999 ,3 decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57  &&
+        arr[j+4] == 46 &&
+        arr[j+5] >= 47 && arr[j+5] <= 57 &&
+        arr[j+6] >= 47 && arr[j+6] <= 57 &&
+        arr[j+7] >= 47 && arr[j+7] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+3]-48;
+            decimal = (((float)arr[j+5]-48)*100 + ((float)arr[j+6]-48)*10 + 
+            (float)arr[j+7]-48)/1000;
+            matrix[i][z] = -(matrix[i][z] + decimal);
+            z++;
+            j=j+7;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for -999.99 ,2 decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57  &&
+        arr[j+4] == 46 &&
+        arr[j+5] >= 47 && arr[j+5] <= 57 &&
+        arr[j+6] >= 47 && arr[j+6] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+3]-48;
+            decimal = (((float)arr[j+5]-48)*10 + ((float)arr[j+6]-48))/100;
+            matrix[i][z] = -(matrix[i][z] + decimal);
+            z++;
+            j=j+6;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for -999.9 ,1 decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57  &&
+        arr[j+4] == 46 &&
+        arr[j+5] >= 47 && arr[j+5] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+3]-48;
+            decimal = (((float)arr[j+5]-48))/10;
+            matrix[i][z] = -(matrix[i][z] + decimal);
+            z++;
+            j=j+5;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for -99.999 ,3 decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57   &&
+        arr[j+3] == 46 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57 &&
+        arr[j+5] >= 47 && arr[j+5] <= 57 &&
+        arr[j+6] >= 47 && arr[j+6] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            decimal = (((float)arr[j+4]-48)*100 +((float)arr[j+5]-48)*10+
+            ((float)arr[j+6]-48))/1000;
+            matrix[i][z] = -(matrix[i][z] + decimal);
+            z++;
+            j=j+6;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for -99.99 ,2 decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57   &&
+        arr[j+3] == 46 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57 &&
+        arr[j+5] >= 47 && arr[j+5] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            decimal = (((float)arr[j+4]-48)*10 +((float)arr[j+5]-48))/100;
+            matrix[i][z] = -(matrix[i][z] + decimal);
+            z++;
+            j=j+5;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for -99.9 ,1 decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57   &&
+        arr[j+3] == 46 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            decimal = (((float)arr[j+4]-48))/10;
+            matrix[i][z] = -(matrix[i][z] + decimal);
+            z++;
+            j=j+4;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for -9.999 ,3 decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] == 46 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57 &&
+        arr[j+5] >= 47 && arr[j+5] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            decimal = (((float)arr[j+3]-48)*100 + ((float)arr[j+4]-48)*10 + 
+            (float)arr[j+5]-48)/1000;
+            matrix[i][z] = -(matrix[i][z] + decimal);
+            z++;
+            j=j+5;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for -9.99 ,3 decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] == 46 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            decimal = (((float)arr[j+3]-48)*10 + ((float)arr[j+4]-48))/100;
+            matrix[i][z] = -(matrix[i][z] + decimal);
+            z++;
+            j=j+4;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for -9.9 ,1 decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] == 46 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57 ) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            decimal = (((float)arr[j+3]-48))/10;
+            matrix[i][z] = -(matrix[i][z] + decimal);
+            z++;
+            j=j+3;
+            h1++;
+        }
+        else if (arr[j] >= 47 && arr[j] <= 57 &&//+ve 4 numbers.3decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57 &&
+        arr[j+4] == 46 &&
+        arr[j+5] >= 47 && arr[j+5] <= 57 &&
+        arr[j+6] >= 47 && arr[j+6] <= 57 &&
+        arr[j+7] >= 47 && arr[j+7] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+3]-48;
+            decimal = (((float)arr[j+5]-48)*100 + ((float)arr[j+6]-48)*10 +
+            ((float)arr[j+7]-48))/1000;
+            matrix[i][z] = matrix[i][z] + decimal;
+            z++;
+            j=j+8;
+            h1++;
+        }
+        else if (arr[j] >= 47 && arr[j] <= 57 && //+ve 4 numbers.2decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57 &&
+        arr[j+4] == 46 &&
+        arr[j+5] >= 47 && arr[j+5] <= 57 &&
+        arr[j+6] >= 47 && arr[j+6] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+3]-48;
+            decimal = (((float)arr[j+5]-48)*10 + ((float)arr[j+6]-48))/100;
+            matrix[i][z] = matrix[i][z] + decimal;
+            z++;
+            j=j+7;
+            h1++;
+        }
+        else if (arr[j] >= 47 && arr[j] <= 57 &&//+ve 4 numbers.1decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57 &&
+        arr[j+4] == 46 &&
+        arr[j+5] >= 47 && arr[j+5] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+3]-48;
+            decimal = (((float)arr[j+5]-48))/10;
+            matrix[i][z] = matrix[i][z] + decimal;
+            z++;
+            j=j+6;
+            h1++;
+        }
+        else if (arr[j] >= 47 && arr[j] <= 57 &&//+ve 3 numbers.3decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] == 46 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57 &&
+        arr[j+5] >= 47 && arr[j+5] <= 57 &&
+        arr[j+6] >= 47 && arr[j+6] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            decimal = (((float)arr[j+4]-48)*100 + ((float)arr[j+5]-48)*10 +
+            ((float)arr[j+6]-48))/1000;
+            matrix[i][z] = matrix[i][z] + decimal;
+            z++;
+            j=j+6;
+            h1++;
+        }
+        else if (arr[j] >= 47 && arr[j] <= 57 &&//+ve 3 numbers.2decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] == 46 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57 &&
+        arr[j+5] >= 47 && arr[j+5] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            decimal = (((float)arr[j+4]-48)*10 + ((float)arr[j+5]-48))/100;
+            matrix[i][z] = matrix[i][z] + decimal;
+            z++;
+            j=j+5;
+            h1++;
+        }
+        else if (arr[j] >= 47 && arr[j] <= 57 &&//+ve 3 numbers.1decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] == 46 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+2]-48;
+            decimal = (((float)arr[j+4]-48))/10;
+            matrix[i][z] = matrix[i][z] + decimal;
+            z++;
+            j=j+4;
+            h1++;
+        }
+        else if (arr[j] >= 47 && arr[j] <= 57 &&//+ve 2 numbers.3decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] == 46 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57 &&
+        arr[j+5] >= 47 && arr[j+5] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            decimal = (((float)arr[j+3]-48)*100 + ((float)arr[j+4]-48)*10 +
+            ((float)arr[j+5]-48))/1000;
+            matrix[i][z] = matrix[i][z] + decimal;
+            z++;
+            j=j+6;
+            h1++;
+        }
+        else if (arr[j] >= 47 && arr[j] <= 57 &&//+ve 2 numbers.2decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] == 46 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            decimal = (((float)arr[j+3]-48)*10 + ((float)arr[j+4]-48))/100;
+            matrix[i][z] = matrix[i][z] + decimal;
+            z++;
+            j=j+4;
+            h1++;
+        }
+        else if (arr[j] >= 47 && arr[j] <= 57 &&//+ve 2 numbers.1decimals
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] == 46 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j]-48;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j+1]-48;
+            decimal = (((float)arr[j+3]-48))/10;
+            matrix[i][z] = matrix[i][z] + decimal;
+            z++;
+            j=j+3;
+            h1++;
+        }
+        else if (arr[j] >= 47 && arr[j] <= 57 &&
+        arr[j+1] == 46 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j]-48;
+            decimal = (((float)arr[j+2]-48)*100 + ((float)arr[j+3]-48)*10 +
+            ((float)arr[j+4]-48))/1000;
+            matrix[i][z] = matrix[i][z] + decimal;
+            z++;
+            j=j+4;
+            h1++;
+        }
+        else if (arr[j] >= 47 && arr[j] <= 57 &&
+        arr[j+1] == 46 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j]-48;
+            decimal = (((float)arr[j+2]-48)*10 + ((float)arr[j+3]-48))/100;
+            matrix[i][z] = matrix[i][z] + decimal;
+            z++;
+            j=j+3;
+            h1++;
+        }
+        else if (arr[j] >= 47 && arr[j] <= 57 &&
+        arr[j+1] == 46 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (float)arr[j]-48;
+            decimal = (((float)arr[j+2]-48))/10;
+            matrix[i][z] = matrix[i][z] + decimal;
+            z++;
+            j=j+2;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for 4 numbers -ve
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57 &&
+        arr[j+4] >= 47 && arr[j+4] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j+2]-48;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j+3]-48;
+            matrix[i][z] = -(matrix[i][z] *10 + (int)arr[j+4]-48);
+            z++;
+            j=j+4;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for 3 numbers -ve
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j+2]-48;
+            matrix[i][z] = -(matrix[i][z] *10 + (int)arr[j+3]-48);
+            
+            z++;
+            j=j+3;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for 2 numbers -ve
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 ) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j+1]-48;
+            matrix[i][z] = -(matrix[i][z] *10 + (int)arr[j+2]-48);
+            
+            z++;
+            j=j+2;
+            h1++;
+        }
+        else if ( arr[j] == 45  && //for 1 numbers -ve
+        arr[j+1] >= 47 && arr[j+1] <= 57 ) {
+            matrix[i][z] = 0;
+            matrix[i][z] = -(matrix[i][z] *10 + (int)arr[j+1]-48);
+            z++;
+            j=j+1;
+            h1++;
+        }
+        else if ( arr[j] >= 47 && arr[j] <= 57 && //for 4 numbers +ve
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 &&
+        arr[j+3] >= 47 && arr[j+3] <= 57) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j]-48;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j+2]-48;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j+3]-48;
+            z++;
+            j=j+3;
+            h1++;
+        }
+        else if ( arr[j] >= 47 && arr[j] <= 57 && //for 3 numbers +ve
+        arr[j+1] >= 47 && arr[j+1] <= 57 &&
+        arr[j+2] >= 47 && arr[j+2] <= 57 ) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j]-48;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j+1]-48;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j+2]-48;
+            z++;
+            j=j+2;
+            h1++;
+        }
+        else if ( arr[j] >= 47 && arr[j] <= 57 && //for 2 numbers +ve
+        arr[j+1] >= 47 && arr[j+1] <= 57  ) {
+            matrix[i][z] = 0;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j]-48;
+            matrix[i][z] = matrix[i][z] *10 + (int)arr[j+1]-48;
+            z++;
+            j=j+1;
+            h1++;
+        }
+        else if (arr[j] >= 47 && arr[j] <= 57) {
+            matrix[i][z] = (int)arr[j] - 48;
+            z++;
+            h1++;
+        } //1 +ve num
+    } //from chars to int
+    /*for (i = 0; i < 100; i++) {
+        for (j = 0; j < 100; j++) {
+            if (matrix[i][j] == 0)continue;
+            cout << setprecision(7)<<matrix[i][j] << " " <<i << " " << j << ",";
+            if (i == 2)cout << endl;
+        }
+
+    }  */ //breakpoint
+    cin.getline(sign, 2,'\n');
+    cin.getline(arr2, 5000,'\n');
+    int length2 = strlen(arr2);
+    for (j = 0,i=0,z=0; j < length2;j++) {
+        decimal=0;
+        if (arr2[j] == 44) {
+            countrows2++;
+            if(countcolumns2!=countcolumns1 && arr[0] == 91){
+                cout << "ERROR!";
+                return 0;
+            }
+            countcolumns2=0;
+            i++;
+            z=0;
+        }
+        if (arr2[j] == 32 && arr2[j+1]==32) {
+            countcolumns2++;
+            j+=2;
+        }
+        if (arr2[j] == 32) {
+            countcolumns2++;
+        }
+        if ( arr2[j] == 45  && //for -9999.999 ,3 decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57 &&
+        arr2[j+5] == 46 &&
+        arr2[j+6] >= 47 && arr2[j+6] <= 57 &&
+        arr2[j+7] >= 47 && arr2[j+7] <= 57 &&
+        arr2[j+8] >= 47 && arr2[j+8] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+3]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+4]-48;
+            decimal = (((float)arr2[j+6]-48)*100 + ((float)arr2[j+7]-48)*10 + 
+            (float)arr2[j+8]-48)/1000;
+            matrix2[i][z] = -(matrix2[i][z] + decimal);
+            z++;
+            j=j+8;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for -9999.99 2 ,decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57 &&
+        arr2[j+5] == 46 &&
+        arr2[j+6] >= 47 && arr2[j+6] <= 57 &&
+        arr2[j+7] >= 47 && arr2[j+7] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+3]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+4]-48;
+            decimal = (((float)arr2[j+6]-48)*10 + ((float)arr2[j+7]-48))/100;
+            matrix2[i][z] = -(matrix2[i][z] + decimal);
+            z++;
+            j=j+7;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for -9999.99 , 1 decimal
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57 &&
+        arr2[j+5] == 46 &&
+        arr2[j+6] >= 47 && arr2[j+6] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+3]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+4]-48;
+            decimal = ((float)arr2[j+6]-48)/10;
+            matrix2[i][z] = -(matrix2[i][z] + decimal);
+            z++;
+            j=j+6;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for -999.999 ,3 decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57  &&
+        arr2[j+4] == 46 &&
+        arr2[j+5] >= 47 && arr2[j+5] <= 57 &&
+        arr2[j+6] >= 47 && arr2[j+6] <= 57 &&
+        arr2[j+7] >= 47 && arr2[j+7] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+3]-48;
+            decimal = (((float)arr2[j+5]-48)*100 + ((float)arr2[j+6]-48)*10 + 
+            (float)arr2[j+7]-48)/1000;
+            matrix2[i][z] = -(matrix2[i][z] + decimal);
+            z++;
+            j=j+7;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for -999.99 ,2 decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57  &&
+        arr2[j+4] == 46 &&
+        arr2[j+5] >= 47 && arr2[j+5] <= 57 &&
+        arr2[j+6] >= 47 && arr2[j+6] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+3]-48;
+            decimal = (((float)arr2[j+5]-48)*10 + ((float)arr2[j+6]-48))/100;
+            matrix2[i][z] = -(matrix2[i][z] + decimal);
+            z++;
+            j=j+6;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for -999.9 ,1 decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57  &&
+        arr2[j+4] == 46 &&
+        arr2[j+5] >= 47 && arr2[j+5] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+3]-48;
+            decimal = (((float)arr2[j+5]-48))/10;
+            matrix2[i][z] = -(matrix2[i][z] + decimal);
+            z++;
+            j=j+5;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for -99.999 ,3 decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57   &&
+        arr2[j+3] == 46 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57 &&
+        arr2[j+5] >= 47 && arr2[j+5] <= 57 &&
+        arr2[j+6] >= 47 && arr2[j+6] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            decimal = (((float)arr2[j+4]-48)*100 +((float)arr2[j+5]-48)*10+
+            ((float)arr2[j+6]-48))/1000;
+            matrix2[i][z] = -(matrix2[i][z] + decimal);
+            z++;
+            j=j+6;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for -99.99 ,2 decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57   &&
+        arr2[j+3] == 46 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57 &&
+        arr2[j+5] >= 47 && arr2[j+5] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            decimal = (((float)arr2[j+4]-48)*10 +((float)arr2[j+5]-48))/100;
+            matrix2[i][z] = -(matrix2[i][z] + decimal);
+            z++;
+            j=j+5;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for -99.9 ,1 decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57   &&
+        arr2[j+3] == 46 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            decimal = (((float)arr2[j+4]-48))/10;
+            matrix2[i][z] = -(matrix2[i][z] + decimal);
+            z++;
+            j=j+4;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for -9.999 ,3 decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] == 46 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57 &&
+        arr2[j+5] >= 47 && arr2[j+5] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            decimal = (((float)arr2[j+3]-48)*100 + ((float)arr2[j+4]-48)*10 + 
+            (float)arr2[j+5]-48)/1000;
+            matrix2[i][z] = -(matrix2[i][z] + decimal);
+            z++;
+            j=j+5;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for -9.99 ,3 decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] == 46 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            decimal = (((float)arr2[j+3]-48)*10 + ((float)arr2[j+4]-48))/100;
+            matrix2[i][z] = -(matrix2[i][z] + decimal);
+            z++;
+            j=j+4;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for -9.9 ,1 decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] == 46 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57 ) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            decimal = (((float)arr2[j+3]-48))/10;
+            matrix2[i][z] = -(matrix2[i][z] + decimal);
+            z++;
+            j=j+3;
+            h2++;
+        }
+        else if (arr2[j] >= 47 && arr2[j] <= 57 &&//+ve 4 numbers.3decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57 &&
+        arr2[j+4] == 46 &&
+        arr2[j+5] >= 47 && arr2[j+5] <= 57 &&
+        arr2[j+6] >= 47 && arr2[j+6] <= 57 &&
+        arr2[j+7] >= 47 && arr2[j+7] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+3]-48;
+            decimal = (((float)arr2[j+5]-48)*100 + ((float)arr2[j+6]-48)*10 +
+            ((float)arr2[j+7]-48))/1000;
+            matrix2[i][z] = matrix2[i][z] + decimal;
+            z++;
+            j=j+8;
+            h2++;
+        }
+        else if (arr2[j] >= 47 && arr2[j] <= 57 && //+ve 4 numbers.2decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57 &&
+        arr2[j+4] == 46 &&
+        arr2[j+5] >= 47 && arr2[j+5] <= 57 &&
+        arr2[j+6] >= 47 && arr2[j+6] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+3]-48;
+            decimal = (((float)arr2[j+5]-48)*10 + ((float)arr2[j+6]-48))/100;
+            matrix2[i][z] = matrix2[i][z] + decimal;
+            z++;
+            j=j+7;
+            h2++;
+        }
+        else if (arr2[j] >= 47 && arr2[j] <= 57 &&//+ve 4 numbers.1decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57 &&
+        arr2[j+4] == 46 &&
+        arr2[j+5] >= 47 && arr2[j+5] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+3]-48;
+            decimal = (((float)arr2[j+5]-48))/10;
+            matrix2[i][z] = matrix2[i][z] + decimal;
+            z++;
+            j=j+6;
+            h2++;
+        }
+        else if (arr2[j] >= 47 && arr2[j] <= 57 &&//+ve 3 numbers.3decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] == 46 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57 &&
+        arr2[j+5] >= 47 && arr2[j+5] <= 57 &&
+        arr2[j+6] >= 47 && arr2[j+6] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            decimal = (((float)arr2[j+4]-48)*100 + ((float)arr2[j+5]-48)*10 +
+            ((float)arr2[j+6]-48))/1000;
+            matrix2[i][z] = matrix2[i][z] + decimal;
+            z++;
+            j=j+6;
+            h2++;
+        }
+        else if (arr2[j] >= 47 && arr2[j] <= 57 &&//+ve 3 numbers.2decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] == 46 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57 &&
+        arr2[j+5] >= 47 && arr2[j+5] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            decimal = (((float)arr2[j+4]-48)*10 + ((float)arr2[j+5]-48))/100;
+            matrix2[i][z] = matrix2[i][z] + decimal;
+            z++;
+            j=j+5;
+            h2++;
+        }
+        else if (arr2[j] >= 47 && arr2[j] <= 57 &&//+ve 3 numbers.1decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] == 46 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+2]-48;
+            decimal = (((float)arr2[j+4]-48))/10;
+            matrix2[i][z] = matrix2[i][z] + decimal;
+            z++;
+            j=j+4;
+            h2++;
+        }
+        else if (arr2[j] >= 47 && arr2[j] <= 57 &&//+ve 2 numbers.3decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] == 46 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57 &&
+        arr2[j+5] >= 47 && arr2[j+5] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            decimal = (((float)arr2[j+3]-48)*100 + ((float)arr2[j+4]-48)*10 +
+            ((float)arr2[j+5]-48))/1000;
+            matrix2[i][z] = matrix2[i][z] + decimal;
+            z++;
+            j=j+6;
+            h2++;
+        }
+        else if (arr2[j] >= 47 && arr2[j] <= 57 &&//+ve 2 numbers.2decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] == 46 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            decimal = (((float)arr2[j+3]-48)*10 + ((float)arr2[j+4]-48))/100;
+            matrix2[i][z] = matrix2[i][z] + decimal;
+            z++;
+            j=j+4;
+            h2++;
+        }
+        else if (arr2[j] >= 47 && arr2[j] <= 57 &&//+ve 2 numbers.1decimals
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] == 46 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j+1]-48;
+            decimal = (((float)arr2[j+3]-48))/10;
+            matrix2[i][z] = matrix2[i][z] + decimal;
+            z++;
+            j=j+3;
+            h2++;
+        }
+        else if (arr2[j] >= 47 && arr2[j] <= 57 &&
+        arr2[j+1] == 46 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j]-48;
+            decimal = (((float)arr2[j+2]-48)*100 + ((float)arr2[j+3]-48)*10 +
+            ((float)arr2[j+4]-48))/1000;
+            matrix2[i][z] = matrix2[i][z] + decimal;
+            z++;
+            j=j+4;
+            h2++;
+        }
+        else if (arr2[j] >= 47 && arr2[j] <= 57 &&
+        arr2[j+1] == 46 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j]-48;
+            decimal = (((float)arr2[j+2]-48)*10 + ((float)arr2[j+3]-48))/100;
+            matrix2[i][z] = matrix2[i][z] + decimal;
+            z++;
+            j=j+3;
+            h2++;
+        }
+        else if (arr2[j] >= 47 && arr2[j] <= 57 &&
+        arr2[j+1] == 46 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (float)arr2[j]-48;
+            decimal = (((float)arr2[j+2]-48))/10;
+            matrix2[i][z] = matrix2[i][z] + decimal;
+            z++;
+            j=j+2;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for 4 numbers -ve
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57 &&
+        arr2[j+4] >= 47 && arr2[j+4] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j+2]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j+3]-48;
+            matrix2[i][z] = -(matrix2[i][z] *10 + (int)arr2[j+4]-48);
+            z++;
+            j=j+4;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for 3 numbers -ve
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j+2]-48;
+            matrix2[i][z] = -(matrix2[i][z] *10 + (int)arr2[j+3]-48);
+            
+            z++;
+            j=j+3;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for 2 numbers -ve
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 ) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j+1]-48;
+            matrix2[i][z] = -(matrix2[i][z] *10 + (int)arr2[j+2]-48);
+            
+            z++;
+            j=j+2;
+            h2++;
+        }
+        else if ( arr2[j] == 45  && //for 1 numbers -ve
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 ) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = -(matrix2[i][z] *10 + (int)arr2[j+1]-48);
+            z++;
+            j=j+1;
+            h2++;
+        }
+        else if ( arr2[j] >= 47 && arr2[j] <= 57 && //for 4 numbers +ve
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 &&
+        arr2[j+3] >= 47 && arr2[j+3] <= 57) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j+2]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j+3]-48;
+            z++;
+            j=j+3;
+            h2++;
+        }
+        else if ( arr2[j] >= 47 && arr2[j] <= 57 && //for 3 numbers +ve
+        arr2[j+1] >= 47 && arr2[j+1] <= 57 &&
+        arr2[j+2] >= 47 && arr2[j+2] <= 57 ) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j+1]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j+2]-48;
+            z++;
+            j=j+2;
+            h2++;
+        }
+        else if ( arr2[j] >= 47 && arr2[j] <= 57 && //for 2 numbers +ve
+        arr2[j+1] >= 47 && arr2[j+1] <= 57  ) {
+            matrix2[i][z] = 0;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j]-48;
+            matrix2[i][z] = matrix2[i][z] *10 + (int)arr2[j+1]-48;
+            z++;
+            j=j+1;
+            h2++;
+        }
+        else if (arr2[j] >= 47 && arr2[j] <= 57) {
+            matrix2[i][z] = (int)arr2[j] - 48;
+            z++;
+            h2++;
+        } //1 +ve num
+    }
+    if((float)h1/countrows1 !=(float)countcolumns1){
+        cout << "ERROR!";
+        return 0;
+    }//check matrix dimensions
+    if((float)h2/countrows2 !=(float)countcolumns2){
+        cout << "ERROR!";
+        return 0;
+    }//check matrix dimensions 
+    if(sign[0] == 42 && arr[0] !=91){
+        for(i=0;i<100;i++){
+            for(j=0;j<100;j++){
+                finalresult[i][j]=matrix[0][0] * matrix2[i][j];
+            }
+        }
+        cout << "[";
+        for(i=0;i<100;i++){
+            if(i!=0 && i<countrows2)cout <<", ";//adding comma between rows
+            for(j=0;j<100;j++){ 
+                if(j>=countcolumns2 || i >=countrows2)continue;//to cout real zeros
+                cout<<finalresult[i][j];
+                if( j==countcolumns2-1)continue; //limiting spaces between brackets and commas
+                if(i==countrows2-1 && j==countcolumns2-1)continue;
+                cout <<" ";
+            }
+        }
+        cout << "]";
+        return 0;
+    } //scalar * matrix
+    if(sign[0] == 42 && arr2[0] !=91){
+        for(i=0;i<100;i++){
+            for(j=0;j<100;j++){
+                finalresult[i][j]=matrix[i][j] * matrix2[0][0];
+            }
+        }
+        cout << "[";
+        for(i=0;i<100;i++){
+            if(i!=0 && i<countrows1)cout <<", ";//adding comma between rows
+            for(j=0;j<100;j++){ 
+                if(j>=countcolumns1 || i >=countrows1)continue;//to cout real zeros
+                cout<<finalresult[i][j];
+                if( j==countcolumns1-1)continue; //limiting spaces between brackets and commas
+                if(i==countrows1-1 && j==countcolumns1-1)continue;
+                cout <<" ";
+            }
+        }
+        cout << "]";
+        return 0;
+    }//matrix * scalar 
+    if(sign[0]==43){ //addition
+    if(countrows1 != countrows2 || countcolumns1!=countcolumns2){
+        cout << "ERROR!";
+        return 0;
+    }
+        for(i=0;i<100;i++){
+            for(j=0;j<100;j++){
+                finalresult[i][j]=matrix[i][j]+matrix2[i][j];
+            }
+        }
+        cout << "[";
+        for(i=0;i<100;i++){
+            if(i!=0 && i<countrows1)cout <<", ";//adding comma between rows
+            for(j=0;j<100;j++){
+                if(i>=countrows1 or j>=countcolumns1)continue;//to cout real zeros
+                cout<<finalresult[i][j];
+                if( j==countcolumns1-1)continue; //limiting spaces between brackets and commas
+                if(i==countrows1-1 && j==countcolumns1-1)continue;
+                cout <<" ";
+            }
+        }
+        cout << "]";
+        //cout << countrows1 << countcolumns1;  //breakpoint
+        return 0;
+    }// addition
+    if(sign[0] == 45){
+        for(i=0;i<100;i++){
+            if(countrows1 != countrows2 || countcolumns1!=countcolumns2){
+        cout << "ERROR!";
+        return 0;
+    }
+            for(j=0;j<100;j++){
+                finalresult[i][j]=matrix[i][j]-matrix2[i][j];
+            }
+        }
+        cout << "[";
+        for(i=0;i<100;i++){
+            if(i!=0 && i<countrows1)cout <<", ";//adding comma between rows
+            for(j=0;j<100;j++){
+                if(i>=countrows1 or j>=countcolumns1)continue; //to cout real zerzerps
+
+                 cout<<finalresult[i][j];
+            if( j==countcolumns1-1)continue; //limiting spaces between brackets and commas
+                if(i==countrows1-1 && j==countcolumns1-1)continue;
+                cout <<" ";
+            }
+        }
+        cout << "]";
+        return 0;
+    }// subtraction
+    
+    else if(sign[0] == 42){
+        if((countcolumns1 != countrows2) && (countrows1 != countcolumns2)){
+            cout << "ERROR!";
+            return 0;
+        }
+        for(i=0;i<100;i++){
+            for(j=0;j<100;j++){
+                for(k=0 ; k<100 ; k++){
+                  finalresult[i][j]+=matrix[i][k] * matrix2[k][j];  
+                }
+                
+            }
+        }
+        cout << "[";
+        for(i=0;i<100;i++){
+            if(i!=0 && i<countrows1)cout <<", ";//adding comma between rows
+            for(j=0;j<100;j++){
+                if(i>=countrows1 or j>=countcolumns1)continue; //to cout real zeros
+                cout<<finalresult[i][j];
+                if( j==countcolumns1-1)continue; //limiting spaces between brackets and commas
+                if(i==countrows1-1 && j==countcolumns1-1)continue;
+                cout <<" ";
+            }
+        }
+        cout << "]";
+        return 0;
+    } // multiplication
+    if(sign[0] == 47){
+        inverse(matrix2,inv,countcolumns1);
+        if(inverse(matrix2,inv,countcolumns1) == false){
+            cout << "ERROR!";
+            return 0;
+        }
+
+            for(i=0;i<100;i++){
+            for(j=0;j<100;j++){
+                for(k=0 ; k<100 ; k++){
+                  finalresult[i][j]+=matrix[i][k] * inv[k][j];  
+                }
+                
+            }
+        }
+            
+        /*for(i=0;i<100;i++){
+            for(j=0;j<100;j++){
+                if(inv[i][j]==0 && i>=countrows2 or j>=countcolumns2)continue;
+            cout << finalresult[i][j] << " "<<i  << " "<<j <<",";
+            }
+        }*/
+        cout << "[";
+        for(i=0;i<100;i++){
+            if(i!=0 && i<countrows1)cout <<", ";//adding comma between rows
+            for(j=0;j<100;j++){
+                if(i>=countrows1 or j>=countcolumns1)continue;//to cout real zeros          
+                cout<<finalresult[i][j];
+                if( j==countcolumns1-1)continue; //limiting spaces between brackets and commas
+                if(i==countrows1-1 && j==countcolumns1-1)continue;
+                cout <<" ";
+            }
+        }
+        cout << "]";  
+        
+    }//division
+    else cout << "ERROR!";
+    return 0;
+}
+
+ 
+
+    
+ 
+
